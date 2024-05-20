@@ -44,10 +44,3 @@
   --brown: #B27146;
   --cream: #D8CBC2;
 }
-.progress-bar-custom {
-  background-color: var(--blue);
-}
-
-.progress-bar-background {
-  background-color: var(--light-light-blue);
-}

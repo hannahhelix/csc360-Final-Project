@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Button, Container, Row, Col, ProgressBar } from 'react-bootstrap';
-import "./App.css"
+import "./Homepage.css"
 import Budgets from './Budgets';
 import Savings from './Savings';
 
@@ -23,7 +23,7 @@ function HomePage() {
                 <ProgressBar now={75} className="progress-bar-custom" label="75%" />
                 </Col>
             </Row>
-            <div className="horizontal-line"></div>
+            <div className="horizontal-line"/>
             <Row>
                 <Col md={8}>
                 <h3><b>Quick Look</b></h3>
