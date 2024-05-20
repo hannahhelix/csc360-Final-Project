@@ -36,3 +36,18 @@
     transform: rotate(360deg);
   }
 }
+
+:root {
+  --light-light-blue: #BACFD8;
+  --light-blue: #588EA5;
+  --blue: #316F86;
+  --brown: #B27146;
+  --cream: #D8CBC2;
+}
+.progress-bar-custom {
+  background-color: var(--blue);
+}
+
+.progress-bar-background {
+  background-color: var(--light-light-blue);
+}
