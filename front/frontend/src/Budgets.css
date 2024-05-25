@@ -5,8 +5,29 @@
     background-color: var(--light-light-blue);
     padding: 20px;
     border-radius: 10px;
+    width: fit-content;
+}
+.top-navigation {
+    padding: 10px 20px;
 }
 .horizontal-line {
     border-bottom: 2px solid black;
     margin: 20px 0;
+}
+.small-create-button, .back-button, .edit-button {
+    background-color: var(--cream);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 15px;
+}
+.container .small-create-button:hover,
+.container .small-create-button:active,
+.container .back-button:hover,
+.container .back-button:active,
+.container .edit-button:hover,
+.container .edit-button:active {
+    background-color: var(--brown);
+    color: white;
 }
