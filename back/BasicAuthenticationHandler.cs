@@ -9,40 +9,35 @@ using System.Threading.Tasks;
 
 namespace back
 {
-    public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+  public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
-        private readonly LoginContext _loginContext;
-
         public BasicAuthenticationHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
-            ISystemClock clock,
-            LoginContext loginContext)
+            ISystemClock clock)
             : base(options, logger, encoder, clock)
         {
-            _loginContext = loginContext;
         }
-
-
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            if (!Request.Headers.ContainsKey("Authorization"))
-            {
+            if(!Request.Headers.ContainsKey("Authorization")){
                 return AuthenticateResult.Fail("Missing Authorization Header");
             }
 
             string username = String.Empty;
             string password = String.Empty;
+            string base64Credentials;
             string hashCreds = String.Empty;
-            try
-            {
+            try{
                 var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
                 var credentialBytes = Convert.FromBase64String(authHeader.Parameter);
+                base64Credentials = credentialBytes.ToString();
                 var credentials = System.Text.Encoding.UTF8.GetString(credentialBytes).Split(':');
                 username = credentials[0];
                 password = credentials[1];
 
+                //byte[] creds = base64Credentials//Encoding.UTF8.GetBytes(base64Credentials);
                 using (SHA256 sha256Hash = SHA256.Create())
                 {
                     byte[] bytes = sha256Hash.ComputeHash(credentialBytes);
@@ -51,29 +46,25 @@ namespace back
                     {
                         builder.Append(bytes[i].ToString("x2"));
                     }
-                    hashCreds = builder.ToString();
+                   hashCreds = builder.ToString();
                 }
 
             }
-            catch
-            {
+            catch{
                 return AuthenticateResult.Fail("Error decrypting login");
             }
 
-            try
+            using(var db = new LoginContext())
             {
-                var login = _loginContext.Logins.FirstOrDefault(l => l.Username == username);
-                if (login == null)
-                {
-                    return AuthenticateResult.Fail("Invalid username");
+                var login = db.Logins.FirstOrDefault(l => l.Username == username);
+                if(login == null){
+                    return await Task.FromResult(AuthenticateResult.Fail("Invalid username"));
                 }
-                if (login.Password != password)
-                {
-                    return AuthenticateResult.Fail("Invalid password");
+                if(login.Password != password){
+                    return await Task.FromResult(AuthenticateResult.Fail("Invalid password"));
                 }
-                if (login.Hash != hashCreds)
-                {
-                    return AuthenticateResult.Fail("Invalid credentials");
+                if(login.hash != hashCreds){
+                    return await Task.FromResult(AuthenticateResult.Fail("Invalid credentials"));
                 }
 
                 var claims = new System.Security.Claims.Claim[]{
@@ -83,10 +74,6 @@ namespace back
                 var principal = new System.Security.Claims.ClaimsPrincipal(identity);
                 var ticket = new AuthenticationTicket(principal, Scheme.Name);
                 return AuthenticateResult.Success(ticket);
-            }
-            catch (Exception ex)
-            {
-                return AuthenticateResult.Fail("Error authenticating: " + ex.Message);
             }
         }
     }

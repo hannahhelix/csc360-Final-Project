@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\back.csproj": {}
+    "c:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\back.csproj": {}
   },
   "projects": {
-    "C:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\back.csproj": {
+    "c:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\back.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\back.csproj",
+        "projectUniqueName": "c:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\back.csproj",
         "projectName": "back",
-        "projectPath": "C:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\back.csproj",
+        "projectPath": "c:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\back.csproj",
         "packagesPath": "C:\\Users\\jawsg\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\obj\\",
+        "outputPath": "c:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\jawsg\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -45,6 +45,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Cors": {
+              "target": "Package",
+              "version": "[2.2.0, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[8.0.3, )"

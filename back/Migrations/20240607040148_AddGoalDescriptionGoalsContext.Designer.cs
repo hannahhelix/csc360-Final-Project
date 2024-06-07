@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using back;
 
@@ -10,9 +11,11 @@ using back;
 namespace back.Migrations
 {
     [DbContext(typeof(GoalsContext))]
-    partial class GoalsContextModelSnapshot : ModelSnapshot
+    [Migration("20240607040148_AddGoalDescriptionGoalsContext")]
+    partial class AddGoalDescriptionGoalsContext
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.5");
@@ -55,12 +58,14 @@ namespace back.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("GoalAmount")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -74,9 +79,6 @@ namespace back.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("AccountId")
                         .HasColumnType("INTEGER");
 
                     b.Property<decimal>("Amount")
@@ -93,8 +95,6 @@ namespace back.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
 
                     b.HasIndex("SavingsGoalId");
 
@@ -162,10 +162,6 @@ namespace back.Migrations
 
             modelBuilder.Entity("back.GoalMarkers", b =>
                 {
-                    b.HasOne("back.Account", null)
-                        .WithMany("MonthlyGoals")
-                        .HasForeignKey("AccountId");
-
                     b.HasOne("back.SavingsGoals", "SavingsGoal")
                         .WithMany("GoalMarkersList")
                         .HasForeignKey("SavingsGoalId")
@@ -200,8 +196,6 @@ namespace back.Migrations
             modelBuilder.Entity("back.Account", b =>
                 {
                     b.Navigation("BudgetGoalsList");
-
-                    b.Navigation("MonthlyGoals");
 
                     b.Navigation("SavingsGoalsList");
                 });

@@ -10,8 +10,8 @@ using back;
 namespace back.Migrations.Login
 {
     [DbContext(typeof(LoginContext))]
-    [Migration("20240525181201_InitialLoginMigration")]
-    partial class InitialLoginMigration
+    [Migration("20240607035923_AddGoalDescription")]
+    partial class AddGoalDescription
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,12 +25,20 @@ namespace back.Migrations.Login
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Base64Credentials")
+                    b.Property<decimal>("BudgetGoalAmount")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BudgetGoalDecription")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BudgetGoalTitle")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Hash")
-                        .IsRequired()
+                    b.Property<decimal>("GoalSavingsBalance")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("InitialSavingsBalance")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Password")
@@ -38,6 +46,14 @@ namespace back.Migrations.Login
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("base64Credentials")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("hash")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

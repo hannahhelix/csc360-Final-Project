@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using back;
 
@@ -10,9 +11,11 @@ using back;
 namespace back.Migrations
 {
     [DbContext(typeof(GoalsContext))]
-    partial class GoalsContextModelSnapshot : ModelSnapshot
+    [Migration("20240607040514_AddGoalDesc")]
+    partial class AddGoalDesc
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.5");
@@ -76,9 +79,6 @@ namespace back.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("AccountId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<decimal>("Amount")
                         .HasColumnType("TEXT");
 
@@ -93,8 +93,6 @@ namespace back.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
 
                     b.HasIndex("SavingsGoalId");
 
@@ -162,10 +160,6 @@ namespace back.Migrations
 
             modelBuilder.Entity("back.GoalMarkers", b =>
                 {
-                    b.HasOne("back.Account", null)
-                        .WithMany("MonthlyGoals")
-                        .HasForeignKey("AccountId");
-
                     b.HasOne("back.SavingsGoals", "SavingsGoal")
                         .WithMany("GoalMarkersList")
                         .HasForeignKey("SavingsGoalId")
@@ -200,8 +194,6 @@ namespace back.Migrations
             modelBuilder.Entity("back.Account", b =>
                 {
                     b.Navigation("BudgetGoalsList");
-
-                    b.Navigation("MonthlyGoals");
 
                     b.Navigation("SavingsGoalsList");
                 });

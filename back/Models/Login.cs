@@ -4,29 +4,37 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 
-public class Login{
+public class Login
+{
     public int Id { get; set; }
     public string Username { get; set; }
     public string Password { get; set; }
-    public string Base64Credentials { get; set; }
-    public string Hash { get; set; }
+    public string base64Credentials { get; set; }
+    public string hash { get; set; }
+    
 
-    public Login(string username, string password){
-        this.Id = RandomNumberGenerator.GetInt32(1000);
+    public Login(string username, string password)
+    {
+        this.Id = System.Security.Cryptography.RandomNumberGenerator.GetInt32(1000);
         Username = username;
         Password = password;
-        this.Base64Credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes(username + ":" + password));
-        var byteCredentials = Convert.FromBase64String(this.Base64Credentials);
+        this.base64Credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes(username + ":" + password));
+        var byteCredentials = Convert.FromBase64String(this.base64Credentials);
         using (SHA256 sha256Hash = SHA256.Create())
         {
             byte[] bytes = sha256Hash.ComputeHash(byteCredentials);
-            StringBuilder builder = new StringBuilder();
+            System.Text.StringBuilder builder = new System.Text.StringBuilder();
             for (int i = 0; i < bytes.Length; i++)
             {
                 builder.Append(bytes[i].ToString("x2"));
             }
-            this.Hash = builder.ToString();
+            this.hash = builder.ToString();
         }
     }
 
+    public decimal InitialSavingsBalance { get; set; }
+    public decimal GoalSavingsBalance { get; set; }
+    public string BudgetGoalTitle { get; set; }
+    public decimal BudgetGoalAmount { get; set; }
+    public string? BudgetGoalDecription { get; set; }
 }

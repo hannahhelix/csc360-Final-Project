@@ -5,7 +5,7 @@
 namespace back.Migrations.Login
 {
     /// <inheritdoc />
-    public partial class InitialLoginMigration : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,8 +18,13 @@ namespace back.Migrations.Login
                         .Annotation("Sqlite:Autoincrement", true),
                     Username = table.Column<string>(type: "TEXT", nullable: false),
                     Password = table.Column<string>(type: "TEXT", nullable: false),
-                    Base64Credentials = table.Column<string>(type: "TEXT", nullable: false),
-                    Hash = table.Column<string>(type: "TEXT", nullable: false)
+                    base64Credentials = table.Column<string>(type: "TEXT", nullable: false),
+                    hash = table.Column<string>(type: "TEXT", nullable: false),
+                    InitialSavingsBalance = table.Column<decimal>(type: "TEXT", nullable: false),
+                    GoalSavingsBalance = table.Column<decimal>(type: "TEXT", nullable: false),
+                    BudgetGoalTitle = table.Column<string>(type: "TEXT", nullable: false),
+                    BudgetGoalAmount = table.Column<decimal>(type: "TEXT", nullable: false),
+                    BudgetGoalDecription = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
