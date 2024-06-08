@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "8E79KeDiYDuxQejDVEMeWTUX9Ztv76Lm6ztX2yXjK9BrIy/TJRkSR2tbDH8dJ/KDcfsBSCCnu7DIbDDwaQADWw==",
+  "dgSpecHash": "RM7Sg8IQHH9n6euiZhslUmDCabFGpFvG11Ak6RTB+SkS6IAmTmPmGvpewxzH+ZXa9Pn/uz2RFmiR5eb3fi6g6Q==",
   "success": true,
-  "projectFilePath": "c:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\back.csproj",
+  "projectFilePath": "C:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\back.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\jawsg\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\jawsg\\.nuget\\packages\\microsoft.aspnetcore.cors\\2.2.0\\microsoft.aspnetcore.cors.2.2.0.nupkg.sha512",
