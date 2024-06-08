@@ -5,8 +5,7 @@ This is my final project for CSC360 Web Applications at DePaul University. The p
 I choose to follow an expense tracker for users to track their spending habits and plan to save their money more productively.
 
 ---
-Video Of Application:
-
+Video Of Application will be within the submission folder
 ---
 ## To Use This Application   
 ### Front End
