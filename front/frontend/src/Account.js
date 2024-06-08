@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import './Account.css'; // Assuming you will create a CSS file named Account.css
+import './Account.css'; 
+import Cookies from 'js-cookie';
+
 
 function Account() {
   const [accountInfo, setAccountInfo] = useState(null);
@@ -9,15 +11,18 @@ function Account() {
   const [editedGoalSavingsBalance, setEditedGoalSavingsBalance] = useState('');
 
   useEffect(() => {
-    fetch('/accounts')
-      .then((response) => response.json())
-      .then((data) => {
-        setAccountInfo(data[0]); // Assuming you want the first account
-        setEditedUsername(data[0].username);
-        setEditedInitialSavingsBalance(data[0].initialSavingsBalance);
-        setEditedGoalSavingsBalance(data[0].goalSavingsBalance);
-      })
-      .catch((error) => console.error('Error fetching account data:', error));
+    const accountId = Cookies.get('accountId'); // Assuming you are using the 'js-cookie' library
+    if (accountId) {
+      fetch(`http://localhost:5235/accounts/${accountId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          setAccountInfo(data);
+          setEditedUsername(data.username);
+          setEditedInitialSavingsBalance(data.initialSavingsBalance);
+          setEditedGoalSavingsBalance(data.goalSavingsBalance);
+        })
+        .catch((error) => console.error('Error fetching account data:', error));
+    }
   }, []);
 
   const handleEdit = () => {
