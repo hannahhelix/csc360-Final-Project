@@ -5,6 +5,11 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -58,118 +63,15 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowAllOrigins");
+app.UseCors(builder =>{
+    builder.WithOrigins("http://localhost:3000")
+           .AllowAnyHeader()
+           .AllowAnyMethod();
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-// app.MapPost("/dummyData", async (HttpContext context) =>
-// {
-//     // Access the dummy data
-//     var dummyData = new
-//     {
-//         savings = new
-//         {
-//             savingsAmount = 2000.05,
-//             transactions = new[]
-//             {
-//                 new { date = "2024-06-01", description = "Deposit from paycheck" },
-//                 new { date = "2024-06-05", description = "Grocery shopping" },
-//                 new { date = "2024-06-10", description = "Utilities bill payment" }
-//             }
-//         },
-//         budget = new []
-//         {
-//            new
-//             {
-//                 title = "Entertainment Budget",
-//                 description = "Budget for movies, games, and outings",
-//                 amount = 300,
-//                 progress = 100
-//             },
-//             new
-//             {
-//                 title = "Food Budget",
-//                 description = "Budget for groceries and dining out",
-//                 amount = 200,
-//                 progress = 150
-//             },
-//             new
-//             {
-//                 title = "Transport Budget",
-//                 description = "Budget for public transport and fuel",
-//                 amount = 100,
-//                 progress = 70
-//             }
-//          },
-//         account = new
-//         {
-//             username = "testuser",
-//             initialSavingsBalance = 1500,
-//             goalSavingsBalance = 5000
-//         }
-//     };
-
-//      using (var goalsContext = new GoalsContext(context.RequestServices.GetRequiredService<DbContextOptions<GoalsContext>>()))
-//     {
-//         // Add account
-//         var account = new Account
-//         {
-//             Username = dummyData.account.username,
-//             Password = "somepassword",
-//             InitialSavingsBalance = dummyData.account.initialSavingsBalance,
-//             SavingsGoalsList = new List<SavingsGoals>(),
-//             BudgetGoalsList = new List<BudgetGoals>()
-//         };
-//         goalsContext.Accounts.Add(account);
-
-//         // Add savings goal
-//         var savingsGoal = new SavingsGoals
-//         {
-//             CurrentSavingsBalance = Convert.ToDecimal(dummyData.savings.savingsAmount),
-//             GoalAmount = dummyData.account.goalSavingsBalance,
-//             AccountId = account.Id,
-//             TransactionHistories = new List<TransactionHistory>(),
-//             GoalMarkersList = new List<GoalMarkers>()
-//         };
-//         goalsContext.SavingsGoals.Add(savingsGoal);
-//         account.SavingsGoalsList.Add(savingsGoal);
-
-//         // Add transactions
-//         foreach (var transaction in dummyData.savings.transactions)
-//         {
-//             var transactionHistory = new TransactionHistory
-//             {
-//                Date = DateTime.Parse(transaction.date),
-//                 Description = transaction.description,
-//                 Amount = 0, 
-//                 SavingsGoalId = savingsGoal.Id
-//             };
-//             goalsContext.TransactionHistories.Add(transactionHistory);
-//             savingsGoal.TransactionHistories.Add(transactionHistory);
-//         }
-
-//         // Add budget goal
-//         foreach (var budget in dummyData.budget)
-//         {
-//             var budgetGoal = new BudgetGoals
-//             {
-//                 Title = budget.title,
-//                 Description = budget.description,
-//                 GoalAmount = budget.amount,
-//                 CurrentAmount = budget.progress,
-//                 AccountId = account.Id
-//             };
-//             goalsContext.BudgetGoals.Add(budgetGoal);
-//             account.BudgetGoalsList.Add(budgetGoal);
-//         }
-
-//         // Save changes to the database
-//         await goalsContext.SaveChangesAsync();
-//     }
-
-//     return Results.Ok("Dummy data saved into the database successfully");
-// });
 
 app.MapPost("/newUser", (Login newUser) => {
     using(var loginContext = new LoginContext()) {
@@ -192,7 +94,7 @@ app.MapPost("/newUser", (Login newUser) => {
                 new BudgetGoals {
                     Title = newUser.BudgetGoalTitle,
                     GoalAmount = newUser.BudgetGoalAmount,
-                    Description = newUser.BudgetGoalDecription
+                    Description = newUser.BudgetGoalDescription
                 }
             }
         };
@@ -203,8 +105,6 @@ app.MapPost("/newUser", (Login newUser) => {
     
     return Results.Created($"/newUser/{newUser.Id}", newUser);
 }).WithName("PostLogin").WithOpenApi();
-
-
 
 app.MapGet("/initialize", () =>
 {
@@ -254,18 +154,18 @@ app.MapPost("/accounts", (Account account) =>
     return Results.Created($"/accounts/{account.Id}", account);
 }).WithName("PostAccounts").WithOpenApi();
 
-app.MapGet("/accounts", () =>
-{
-    using (var context = new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
-    {
-        var accounts = context.Accounts
-            .Include(a => a.SavingsGoalsList)
-                .ThenInclude(sg => sg.GoalMarkersList)
-            .Include(a => a.BudgetGoalsList)
-            .ToList();
-        return Results.Ok(accounts);
-    }
-}).WithName("GetAccounts").WithOpenApi();
+// app.MapGet("/accounts", () =>
+// {
+//     using (var context = new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
+//     {
+//         var accounts = context.Accounts
+//             .Include(a => a.SavingsGoalsList)
+//                 .ThenInclude(sg => sg.GoalMarkersList)
+//             .Include(a => a.BudgetGoalsList)
+//             .ToList();
+//         return Results.Ok(accounts);
+//     }
+// }).WithName("GetAccounts").WithOpenApi();
 
 app.MapPut("/accounts/{id}", (int id, Account updatedAccount) =>
 {
@@ -291,57 +191,90 @@ app.MapPut("/accounts/{id}", (int id, Account updatedAccount) =>
     }
 }).WithName("UpdateAccount").WithOpenApi();
 
-app.MapGet("/savingsGoals", () =>
+// app.MapGet("/savingsGoals", () =>
+// {
+//     using (var context =  new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
+//     {
+//         var savingsGoals = context.SavingsGoals.Include(sg => sg.TransactionHistories).Include(sg => sg.GoalMarkersList).ToList();
+//         return Results.Ok(savingsGoals);
+//     }
+// }).WithName("GetSavingsGoals").WithOpenApi();
+
+// app.MapPost("/savingsGoals", (SavingsGoals savingsGoal) =>
+// {
+//     using (var context =  new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
+//     {
+//         context.SavingsGoals.Add(savingsGoal);
+//         context.SaveChanges();
+//         context.Database.ExecuteSqlRaw("PRAGMA wal_checkpoint;");
+//     }
+//     return Results.Created($"/savingsGoals/{savingsGoal.Id}", savingsGoal);
+// }).WithName("PostSavingsGoals").WithOpenApi();
+
+// app.MapPost("/transactions", async (TransactionHistory transactionHistory, GoalsContext context) =>
+// {
+//     // Add the new transaction to the context
+//     context.TransactionHistories.Add(transactionHistory);
+//     await context.SaveChangesAsync();
+//     var updatedTransactions = await context.TransactionHistories.ToListAsync();
+//     return Results.Ok(updatedTransactions);
+// })
+// .WithName("PostTransaction")
+// .WithOpenApi()
+// .RequireAuthorization(new AuthorizeAttribute() { AuthenticationSchemes = "BasicAuthentication" });
+
+app.MapGet("/accounts/{accountId}/budgetGoal", (int accountId) =>
 {
-    using (var context =  new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
+    using (var context = new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
     {
-        var savingsGoals = context.SavingsGoals.Include(sg => sg.TransactionHistories).Include(sg => sg.GoalMarkersList).ToList();
-        return Results.Ok(savingsGoals);
+        var budgetGoals = context.BudgetGoals
+            .Where(bg => bg.AccountId == accountId)
+            .ToList();
+        return Results.Ok(budgetGoals);
     }
-}).WithName("GetSavingsGoals").WithOpenApi();
+}).WithName("GetBudgetGoalsByAccount").WithOpenApi();
 
-app.MapPost("/savingsGoals", (SavingsGoals savingsGoal) =>
-{
-    using (var context =  new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
-    {
-        context.SavingsGoals.Add(savingsGoal);
-        context.SaveChanges();
-        context.Database.ExecuteSqlRaw("PRAGMA wal_checkpoint;");
-    }
-    return Results.Created($"/savingsGoals/{savingsGoal.Id}", savingsGoal);
-}).WithName("PostSavingsGoals").WithOpenApi();
-
-app.MapGet("/budgetGoals", async (GoalsContext context) =>
-{
-    var budgetGoals = await context.BudgetGoals.ToListAsync();
-    return Results.Ok(budgetGoals);
-}).WithName("GetBudgetGoals").WithOpenApi();
-
-app.MapPost("/budgetGoals", async (HttpContext context, GoalsContext dbContext) =>
+app.MapPost("/newBudgetGoal", async (HttpContext context, GoalsContext dbContext) =>
 {
     try
     {
         var budgetGoalData = await context.Request.ReadFromJsonAsync<BudgetGoals>();
 
-        var newBudgetGoal = new BudgetGoals
+        if (budgetGoalData == null)
         {
-            Title = budgetGoalData.Title,
-            Description = budgetGoalData.Description,
-            GoalAmount = budgetGoalData.GoalAmount,
-            CurrentAmount = budgetGoalData.CurrentAmount
-        };
+            return Results.BadRequest("Invalid request data");
+        }
 
-        dbContext.BudgetGoals.Add(newBudgetGoal);
-
+        dbContext.BudgetGoals.Add(budgetGoalData);
         await dbContext.SaveChangesAsync();
-
-        return Results.Created($"/budgetGoals/{newBudgetGoal.Id}", newBudgetGoal);
+        
+        // If you need to return the created budget goal with the assigned ID
+        return Results.Created($"/budgetGoals/{budgetGoalData.Id}", budgetGoalData);
     }
     catch (Exception ex)
     {
         return Results.BadRequest($"Error creating budget goal: {ex.Message}");
     }
 }).WithName("PostBudgetGoals").WithOpenApi();
+
+app.MapPut("/budgetGoals/{id}/increment", async (int id, HttpContext httpContext, GoalsContext dbContext) =>
+{
+    try
+    {
+        var incrementValue = await httpContext.Request.ReadFromJsonAsync<decimal>();
+        var existingGoal = await dbContext.BudgetGoals.FindAsync(id);
+        if (existingGoal == null){
+            return Results.NotFound("Budget goal not found");
+        }
+        existingGoal.CurrentAmount += incrementValue;
+        await dbContext.SaveChangesAsync();
+        return Results.Ok(existingGoal); 
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest($"Error updating current amount of budget goal: {ex.Message}");
+    }
+}).WithName("IncrementBudgetGoal").WithOpenApi();
 
 app.MapPost("/login", (Login authenticatedUser) => {
   
@@ -351,8 +284,47 @@ app.MapPost("/login", (Login authenticatedUser) => {
         if(user == null){
             return Results.NotFound();
         }
-        return Results.Ok(user);
+
+        using(var financeContext = new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
+        {
+            var account = financeContext.Accounts.FirstOrDefault(a => a.Username == authenticatedUser.Username);
+            if (account == null)
+            {
+                return Results.NotFound("Account not found");
+            }
+
+            var response = new {
+                user,
+                accountId = account.Id 
+            };
+
+            return Results.Ok(response);
+        }
     }
 }).WithName("Login").WithOpenApi().RequireAuthorization(new AuthorizeAttribute() {AuthenticationSchemes="BasicAuthentication"});
+
+app.MapPost("/logout", (HttpContext context) => {
+    // Perform sign-out actions, such as clearing cookies or redirecting to the login page
+    // For example:
+    // Clear authentication cookies
+    // HttpContext.SignOutAsync();\
+    context.Response.Cookies.Delete("username");
+    context.Response.Cookies.Delete("accountId");
+    
+    return Results.Ok("Logged out successfully");
+}).WithName("Logout").WithOpenApi().RequireAuthorization(new AuthorizeAttribute());
+
+app.MapGet("/account/{id}", (string username) => {
+    using(var financeContext = new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
+    {
+        var account = financeContext.Accounts.FirstOrDefault(a => a.Username == username);
+        if (account == null)
+        {
+            return Results.NotFound("Account not found");
+        }
+
+        return Results.Ok(account.Id);
+    }
+}).WithName("GetAccountId").WithOpenApi();
 
 app.Run();

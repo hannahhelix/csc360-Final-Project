@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
 import { Form, FormGroup, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
-
-const Authenticate = (e, navigate, setIsLoggedIn) => {
+const Authenticate = (e, setIsLoggedIn, setAccountId, savingsAmount, goalAmount) => {
+  e.preventDefault();
+  const username = e.target.elements.username.value; 
   fetch('http://localhost:5235/login', {
     method: "POST",
     headers: {
       "Content-type": "application/json",
-      "Authorization": "Basic " + btoa(e.target.elements.username.value + ":" + e.target.elements.password.value)
+      "Authorization": "Basic " + btoa(username + ":" + e.target.elements.password.value)
     },
     body: JSON.stringify(
       { 
-          username: e.target.elements.username.value,
+          username: username,
           password: e.target.elements.password.value,
+          savingsAmount: savingsAmount,
+          goalAmount: goalAmount
       }
     )
   })
@@ -25,29 +29,37 @@ const Authenticate = (e, navigate, setIsLoggedIn) => {
       }
     })
     .then(data => {
+      data = JSON.parse(data); 
+      Cookies.set('username', username, { expires: 7 });
+      Cookies.set('accountId', data.accountId, { expires: 7 });
+      Cookies.set('savingsAmount', data.initialSavingsBalance, { expires: 7 });
+      Cookies.set('goalAmount', data.goalSavingsBalance, { expires: 7 });
       // console.log(data);
       setIsLoggedIn(true);
-      // let dataObj = JSON.parse(data);
-      // navigation("/")
+      setAccountId(data.accountId);
     })
     .catch(error => {
       console.error('There was a problem with the fetch operation:', error);
     });
 };
 
-const NewUser = (e, navigate, setIsLoggedIn) => {
+const NewUser = (e, setIsLoggedIn, setAccountId) => {
+  const username = e.target.elements.new_username.value; 
+  const initialSavingsBalance = parseFloat(e.target.elements.initial_savings_balance.value);
+  const goalSavings = parseFloat(e.target.elements.goal_savings_balance.value);
   fetch('http://localhost:5235/newUser', {
     method: "POST",
     headers: {
       "Content-type": "application/json",
     },
     body: JSON.stringify({
-      username: e.target.elements.new_username.value,
+      username: username,
       password: e.target.elements.new_password.value,
-      initialSavingsBalance: parseFloat(e.target.elements.initial_savings_balance.value),
-      goalSavingsBalance: parseFloat(e.target.elements.goal_savings_balance.value),
+      initialSavingsBalance: initialSavingsBalance,
+      goalSavingsBalance: goalSavings,
       budgetGoalTitle: e.target.elements.budget_goal_title.value,
-      budgetGoalAmount: parseFloat(e.target.elements.budget_goal_amount.value)
+      budgetGoalAmount: parseFloat(e.target.elements.budget_goal_amount.value),
+      budgetGoalDescription: e.target.elements.budget_goal_description.value,
     })
   })
   .then(response => {
@@ -58,8 +70,13 @@ const NewUser = (e, navigate, setIsLoggedIn) => {
     }
   })
   .then(data => {
+    data = JSON.parse(data); 
+    Cookies.set('username', username, { expires: 7 });
+    Cookies.set('accountId', data.accountId, { expires: 7 });
+    Cookies.set('savingsAmount', data.initialSavingsBalance, { expires: 7 });
+    Cookies.set('goalAmount', data.goalSavingsBalance, { expires: 7 });
     setIsLoggedIn(true);
-    navigate('/');
+    setAccountId(data.accountId);
   })
   .catch(error => {
     console.error('There was a problem with the fetch operation:', error);
@@ -67,8 +84,9 @@ const NewUser = (e, navigate, setIsLoggedIn) => {
 };
 
 function Login({ setIsLoggedIn }) {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
+  const [accountId, setAccountId] = useState(null);
 
   return (
     <div className="container">
@@ -76,11 +94,7 @@ function Login({ setIsLoggedIn }) {
         {isSignUp ? (
           <>
             <h2>Sign Up</h2>
-            <Form onSubmit={(e) => {
-              e.preventDefault();
-              NewUser(e, navigate, setIsLoggedIn);
-              e.target.reset();
-            }}>
+            <Form onSubmit={(e) => NewUser(e, setIsLoggedIn, setAccountId)}>
               <FormGroup className='mb-3'>
                 <Form.Label>Username</Form.Label>
                 <Form.Control type="text" name="new_username" required />
@@ -123,11 +137,7 @@ function Login({ setIsLoggedIn }) {
         ) : (
           <>
             <h2>Login</h2>
-            <Form onSubmit={(e) => {
-              e.preventDefault();
-              Authenticate(e, navigate, setIsLoggedIn);
-              e.target.reset();
-            }}>
+            <Form onSubmit={(e) => Authenticate(e, setIsLoggedIn, setAccountId)}>
               <FormGroup className='mb-3'>
                 <Form.Label>Username</Form.Label>
                 <Form.Control type="text" name="username" required />

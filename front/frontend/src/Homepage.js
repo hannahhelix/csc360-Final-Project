@@ -1,25 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { Button, Container, Row, Col, ProgressBar } from 'react-bootstrap';
-import { Person } from 'react-bootstrap-icons';
+import { useNavigate } from 'react-router-dom';
+import { Person, BoxArrowRight } from 'react-bootstrap-icons';
 import "./Homepage.css"
-// import Budgets from './Budgets';
-// import Savings from './Savings';
-// import Account from './Account';
+import Cookies from 'js-cookie';
 
-function HomePage() {
+function HomePage({ accountId }) {
   const [budgetGoals, setBudgetGoals] = useState([]);
 
+  const username = Cookies.get('username');
+  // const accountIdFromCookie = Cookies.get('accountId');
+
+
   useEffect(() => {
-    fetch('http://localhost:5235/budgetGoals')
-      .then(response => response.json())
+    // console.log("Homepage Account ID:", accountIdFromCookie);
+    const accountId = Cookies.get('accountId');
+    fetch(`http://localhost:5235/accounts/${accountId}/budgetGoal`)
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Failed to fetch budget goals');
+        }
+      })
       .then(data => {
-        setBudgetGoals(data || []);
+        setBudgetGoals(data);
       })
       .catch(error => {
-        console.error('Error fetching user data:', error);
+        console.error('Error fetching budget goals:', error);
       });
   }, []);
+
+
+  const handleLogout = () => {
+    Cookies.remove('username');
+    Cookies.remove('accountId');
+
+  };
 
   return (
     <Container className="summary-container">
@@ -30,23 +48,29 @@ function HomePage() {
             <Person size={35} color="Black" />
           </Link>
         </Col>
+        <Col xs={2} className="text-end">
+        <Link to="/login" onClick={handleLogout}>
+            <Button variant="light" className="logout-button">
+              <BoxArrowRight size={25} />
+            </Button>
+          </Link>
+        </Col>
       </Row>
       <div className="horizontal-line" />
       <Row>
         <Col xs={12} md={8}>
           <h3><b>Quick Look</b></h3>
-          {budgetGoals.map(goal => (
-            <div key={goal.id} className="mb-3">
-              <h5>{goal.title}</h5>
-              <p>Goal Amount: ${goal.goalAmount}</p>
-              <p>Current Amount: ${goal.currentAmount}</p>
-              <ProgressBar
-                now={(goal.currentAmount / goal.goalAmount) * 100}
-                className="progress-bar-custom"
-                label={`${goal.currentAmount} / ${goal.goalAmount}`}
-                style={{ backgroundColor: 'var(--light-light-blue)' }}
-              />
-            </div>
+          {budgetGoals.slice(0, 2).map(goal => (
+          <div key={goal.id} className="mb-3">
+            <h5>{goal.title}</h5>
+            <p>Goal Amount: ${goal.goalAmount}</p>
+            <p>Current Amount: ${goal.currentAmount}</p>
+            <ProgressBar
+              now={(goal.currentAmount / goal.goalAmount) * 100}
+              className="progress-bar-custom"
+              style={{ backgroundColor: 'var(--light-light-blue)' }}
+            />
+          </div>
           ))}
         </Col>
 

@@ -36,5 +36,6 @@ public class Login
     public decimal GoalSavingsBalance { get; set; }
     public string BudgetGoalTitle { get; set; }
     public decimal BudgetGoalAmount { get; set; }
-    public string? BudgetGoalDecription { get; set; }
+    public string? BudgetGoalDescription  { get; set; }
+    
 }

@@ -1,61 +1,67 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Button, ProgressBar } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, ProgressBar, ButtonGroup } from 'react-bootstrap';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Person } from 'react-bootstrap-icons';
 import './Budgets.css';
 import Account from './Account';
+import Cookies from 'js-cookie';
+
 
 function Budgets() {
-  const [goals, setGoals] = useState([]);
+  const [budgetGoals, setBudgetGoals] = useState([]);
+  const [currentAmounts, setCurrentAmounts] = useState(
+    budgetGoals.reduce((acc, goal) => ({ ...acc, [goal.id]: goal.currentAmount }), {})
+  );
+  const accountId = Cookies.get('accountId');
 
   useEffect(() => {
-    fetch('http://localhost:5235/budgetGoals')
-      .then(response => response.json())
-      .then(data => setGoals(data))
-      .catch(error => console.error('Error fetching budget goals:', error));
-  }, []);
-
-  const toggleEdit = (id) => {
-    setGoals(goals.map(goal => {
-      if (goal.id === id) {
-        return { ...goal, editable: !goal.editable };
-      }
-      return goal;
-    }));
-  };
-
-  const handleUpdate = (e, id) => {
-    e.preventDefault();
-    const form = e.target;
-    const updatedAmount = parseFloat(form.updatedAmount.value);
-
-    fetch(`http://localhost:5235/budgetGoals/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ currentAmount: updatedAmount }),
-    })
+    const accountId = Cookies.get('accountId');
+    fetch(`http://localhost:5235/accounts/${accountId}/budgetGoal`)
       .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Failed to fetch budget goals');
         }
-        return response.json();
       })
       .then(data => {
-        const updatedGoals = goals.map(goal => {
-          if (goal.id === id) {
-            return { ...goal, currentAmount: updatedAmount };
-          }
-          return goal;
-        });
-        setGoals(updatedGoals);
+        setBudgetGoals(data);
       })
       .catch(error => {
-        console.error('Error updating budget goal:', error);
+        console.error('Error fetching budget goals:', error);
       });
+  }, []);
 
-    form.reset();
+  useEffect(() => {
+    const initialAmounts = budgetGoals.reduce((acc, goal) => ({ ...acc, [goal.id]: goal.currentAmount }), {});
+    setCurrentAmounts(initialAmounts);
+  }, [budgetGoals]);
+
+  const incrementAmount = async (goalId, increment) => {
+    try {
+      if (increment < 0 && currentAmounts[goalId] + increment < 0) {
+        return; 
+      }
+      const response = await fetch(`http://localhost:5235/budgetGoals/${goalId}/increment`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(increment),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+  
+      const updatedGoal = await response.json();
+      setCurrentAmounts(prevAmounts => ({
+        ...prevAmounts,
+        [goalId]: updatedGoal.currentAmount
+      }));
+    } catch (error) {
+      console.error('Error incrementing amount:', error);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -63,37 +69,44 @@ function Budgets() {
     const form = e.target;
     const title = form.title.value;
     const description = form.description.value;
-    const amount = parseFloat(form.amount.value);
-
+    const goalAmount = parseFloat(form.amount.value);
+    const currentAmount = 0;
+  
+    if (!title || !goalAmount || isNaN(goalAmount)) {
+      console.error('Invalid input data');
+      return;
+    }
+  
     const newGoal = {
-      title: title,
-      description: description,
-      goalAmount: amount,
-      currentAmount: 0,
-      editable: false
+      Title: title,
+      Description: description,
+      GoalAmount: goalAmount,
+      CurrentAmount: currentAmount,
+      AccountId: accountId,
     };
-
-    fetch('http://localhost:5235/budgetGoals', {
+  
+    fetch('http://localhost:5235/newBudgetGoal', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(newGoal),
     })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        const updatedGoals = [...goals, data];
-        setGoals(updatedGoals);
-      })
-      .catch(error => {
-        console.error('Error creating budget goal:', error);
-      });
-
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Budget goal created:', data);
+      const updatedGoals = [...budgetGoals, data];
+      setBudgetGoals(updatedGoals);
+    })
+    .catch(error => {
+      console.error('Error creating budget goal:', error);
+    });
+  
     form.reset();
   };
 
@@ -117,31 +130,32 @@ function Budgets() {
       </Row>
   
       <Row className="container">
-        <Col md={9}>
-          {goals.map((goal) => (
-            <div key={goal.id} className="mb-3">
-              <h4 className="goal-title">{goal.title}</h4>
-              <p className="goal-description">{goal.description}</p>
-              <ProgressBar 
-                now={(goal.currentAmount / goal.goalAmount) * 100} 
-                className="progress-bar-custom" 
-                label={`${goal.currentAmount} / ${goal.goalAmount}`}
-                variant="custom"
-              />
-              <div className="mt-2">
-                {goal.editable ? (
-                  <Form onSubmit={(e) => handleUpdate(e, goal.id)}>
-                    <Form.Group controlId="updatedAmount">
-                      <Form.Control type="number" step="0.01" placeholder="Enter updated amount" required />
-                    </Form.Group>
-                    <Button type="submit" variant="primary">Update</Button>
-                  </Form>
-                ) : (
-                  <Button onClick={() => toggleEdit(goal.id)} className='edit-button' variant="none">Edit</Button>
-                )}
+      <Col md={9}>
+          {budgetGoals.map((goal) => {
+            const isComplete = currentAmounts[goal.id] >= goal.goalAmount;
+
+            return (
+              <div key={goal.id} className="mb-3">
+                <h4 className="goal-title">{goal.title}</h4>
+                <p>Description: {goal.description}</p>
+                <p>Goal Amount: ${goal.goalAmount}</p>
+                <p>
+                  {isComplete ? 'Complete' : `Current Amount: $${currentAmounts[goal.id]}`}
+                </p>
+                <ProgressBar 
+                  now={(currentAmounts[goal.id] / goal.goalAmount) * 100} 
+                  className="progress-bar-custom" 
+                  variant="custom"
+                />
+                <div className="mt-2">
+                  <ButtonGroup>
+                    <Button onClick={() => incrementAmount(goal.id, -1)} variant="danger">-</Button>
+                    <Button onClick={() => incrementAmount(goal.id, 1)} variant="success">+</Button>
+                  </ButtonGroup>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </Col>
   
         <Col md={3}>
