@@ -7,11 +7,11 @@ using back;
 
 #nullable disable
 
-namespace back.Migrations.Login
+namespace back.Migrations
 {
     [DbContext(typeof(LoginContext))]
-    [Migration("20240607035923_AddGoalDescription")]
-    partial class AddGoalDescription
+    [Migration("20240608204315_InitialMigrationLogin")]
+    partial class InitialMigrationLogin
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28,7 +28,7 @@ namespace back.Migrations.Login
                     b.Property<decimal>("BudgetGoalAmount")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("BudgetGoalDecription")
+                    b.Property<string>("BudgetGoalDescription")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("BudgetGoalTitle")

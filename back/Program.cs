@@ -1,16 +1,8 @@
-// using System.Linq;
-// using System.Text.Json;
 using back;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-// using Microsoft.AspNetCore.Builder;
-// using Microsoft.Extensions.DependencyInjection;
-// using Microsoft.Extensions.Hosting;
-// using Microsoft.AspNetCore.Http;
-// using System.Threading.Tasks;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -79,7 +71,7 @@ app.MapPost("/newUser", (Login newUser) => {
         loginContext.SaveChanges();
         loginContext.Database.ExecuteSqlRaw("PRAGMA wal_checkpoint;"); // Ensure WAL checkpoint
     }
-    using(var financeContext =new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options)){
+    using(var financeContext = new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options)) {
 
         var newAccount = new Account {
             Username = newUser.Username,
@@ -101,11 +93,16 @@ app.MapPost("/newUser", (Login newUser) => {
         financeContext.Accounts.Add(newAccount);
         financeContext.SaveChanges(); 
         financeContext.Database.ExecuteSqlRaw("PRAGMA wal_checkpoint;"); // Ensure WAL checkpoint
-    }
-    
-    return Results.Created($"/newUser/{newUser.Id}", newUser);
-}).WithName("PostLogin").WithOpenApi();
 
+        // Create a response object to send back to the client
+        var response = new {
+            AccountId = newAccount.Id,
+            InitialSavingsBalance = newAccount.SavingsGoalsList.First().CurrentSavingsBalance,
+            GoalSavingsBalance = newAccount.SavingsGoalsList.First().GoalAmount
+        };
+        return Results.Created($"/newUser/{newUser.Id}", response);
+    }
+}).WithName("PostLogin").WithOpenApi();
 app.MapGet("/initialize", () =>
 {
    using (var goalsContext = new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
@@ -130,51 +127,12 @@ app.MapGet("/initialize", () =>
     return Results.Ok("Database initialized");
 }).WithName("Init").WithOpenApi();
 
-
-// app.MapPost("/accounts", (Account account) =>
-// {
-//     using (var context = new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
-//     {
-//         context.Accounts.Add(account);
-//         context.SaveChanges();
-//         foreach (var monthlyGoal in account.MonthlyGoals)
-//         {
-//             var goalMarker = new GoalMarkers
-//             {
-//                 SavingsGoalId = monthlyGoal.SavingsGoalId,
-//                 Month = monthlyGoal.Month,
-//                 Amount = monthlyGoal.Amount,
-//                 IsCheckedOff = false 
-//             };
-//             context.GoalMarkers.Add(goalMarker);
-//         }
-//         context.SaveChanges();
-//         context.Database.ExecuteSqlRaw("PRAGMA wal_checkpoint;");
-//     }
-//     return Results.Created($"/accounts/{account.Id}", account);
-// }).WithName("PostAccounts").WithOpenApi();
-
-// app.MapGet("/accounts", () =>
-// {
-//     using (var context = new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
-//     {
-//         var accounts = context.Accounts
-//             .Include(a => a.SavingsGoalsList)
-//                 .ThenInclude(sg => sg.GoalMarkersList)
-//             .Include(a => a.BudgetGoalsList)
-//             .ToList();
-//         return Results.Ok(accounts);
-//     }
-// }).WithName("GetAccounts").WithOpenApi();
-
-
 app.MapGet("/accounts/{accountId}/savingsGoals", (int accountId) =>
 {
     using (var context = new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
     {
         var savingsGoals = context.SavingsGoals
             .Where(sg => sg.AccountId == accountId)
-            .Include(sg => sg.TransactionHistories)
             .Include(sg => sg.GoalMarkersList)
             .Select(sg => new 
             {
@@ -182,7 +140,6 @@ app.MapGet("/accounts/{accountId}/savingsGoals", (int accountId) =>
                 sg.CurrentSavingsBalance,
                 sg.GoalAmount,
                 sg.AccountId,
-                sg.TransactionHistories,
                 sg.GoalMarkersList
             })
             .ToList();
@@ -190,25 +147,52 @@ app.MapGet("/accounts/{accountId}/savingsGoals", (int accountId) =>
     }
 }).WithName("GetSavingsGoals").WithOpenApi();
 
-app.MapPost("/newTransaction", async (HttpContext context, GoalsContext dbContext) =>
+app.MapPost("/newTransaction", async (HttpContext context) =>
 {
     try
     {
-        var transactionData = await context.Request.ReadFromJsonAsync<TransactionHistory>();
-
+        var requestBody = await new StreamReader(context.Request.Body).ReadToEndAsync();
+        var transactionData = System.Text.Json.JsonSerializer.Deserialize<TransactionHistory>(requestBody);
         if (transactionData == null)
         {
             return Results.BadRequest("Invalid request data");
         }
-        dbContext.TransactionHistories.Add(transactionData);
-        await dbContext.SaveChangesAsync();
+        using (var financeContext = new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
+        {
+            financeContext.TransactionHistories.Add(transactionData);
+            await financeContext.SaveChangesAsync();
+            financeContext.Database.ExecuteSqlRaw("PRAGMA wal_checkpoint;");
+        }
         return Results.Created($"/transactions/{transactionData.Id}", transactionData);
     }
     catch (Exception ex)
     {
+        Console.WriteLine("Exception occurred: " + ex.ToString());
         return Results.BadRequest($"Error adding transaction: {ex.Message}");
     }
 }).WithName("PostTransaction").WithOpenApi();
+
+app.MapGet("/accounts/{accountId}/transactions", async (HttpContext context, GoalsContext dbContext) =>
+{
+    try
+    {
+        var accountId = context.Request.RouteValues["accountId"] as string;
+        
+        if (!int.TryParse(accountId, out int accountIdInt))
+        {
+            return Results.BadRequest("Invalid account ID");
+        }
+        var transactions = await dbContext.TransactionHistories
+            .Where(t => t.Account.Id == accountIdInt)
+            .ToListAsync();
+
+        return Results.Ok(transactions);
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest($"Error fetching transaction history: {ex.Message}");
+    }
+}).WithName("GetTransactions").WithOpenApi();
 
 app.MapGet("/accounts/{accountId}/budgetGoal", (int accountId) =>
 {

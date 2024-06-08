@@ -6,6 +6,5 @@ public class SavingsGoals{
     public decimal GoalAmount { get; set; }
     public int AccountId { get; set; }
     public Account Account { get; set; }
-    public List<TransactionHistory> TransactionHistories { get; set; }
     public List<GoalMarkers> GoalMarkersList { get; set; }
 }

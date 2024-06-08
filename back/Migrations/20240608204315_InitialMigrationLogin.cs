@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace back.Migrations.Login
+namespace back.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialMigrationLogin : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -24,7 +24,7 @@ namespace back.Migrations.Login
                     GoalSavingsBalance = table.Column<decimal>(type: "TEXT", nullable: false),
                     BudgetGoalTitle = table.Column<string>(type: "TEXT", nullable: false),
                     BudgetGoalAmount = table.Column<decimal>(type: "TEXT", nullable: false),
-                    BudgetGoalDecription = table.Column<string>(type: "TEXT", nullable: false)
+                    BudgetGoalDescription = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {

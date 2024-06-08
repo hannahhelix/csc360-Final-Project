@@ -5,16 +5,16 @@ import Cookies from 'js-cookie';
 const Authenticate = (e, setIsLoggedIn, setAccountId, savingsAmount, goalAmount) => {
   e.preventDefault();
   const username = e.target.elements.username.value; 
+  const password = e.target.elements.password.value;
   fetch('http://localhost:5235/login', {
     method: "POST",
     headers: {
       "Content-type": "application/json",
-      "Authorization": "Basic " + btoa(username + ":" + e.target.elements.password.value)
+      "Authorization": "Basic " + btoa(username + ":" + password)
     },
-    body: JSON.stringify(
-      { 
+    body: JSON.stringify({ 
           username: username,
-          password: e.target.elements.password.value,
+          password: password,
           savingsAmount: savingsAmount,
           goalAmount: goalAmount
       }
@@ -22,13 +22,14 @@ const Authenticate = (e, setIsLoggedIn, setAccountId, savingsAmount, goalAmount)
   })
     .then(response => {
       if (response.ok) {
-        return response.text();
+        return response.json();
       } else {
         throw new Error('Network response was not ok.');
       }
     })
     .then(data => {
-      data = JSON.parse(data); 
+      // data = JSON.parse(data); 
+      Cookies.set('auth', data, { expires: 7 });
       Cookies.set('username', username, { expires: 7 });
       Cookies.set('accountId', data.accountId, { expires: 7 });
       Cookies.set('savingsAmount', data.initialSavingsBalance, { expires: 7 });
@@ -43,9 +44,15 @@ const Authenticate = (e, setIsLoggedIn, setAccountId, savingsAmount, goalAmount)
 };
 
 const NewUser = (e, setIsLoggedIn, setAccountId) => {
-  const username = e.target.elements.new_username.value; 
+  e.preventDefault(); 
+  const username = e.target.elements.new_username.value;
+  const password = e.target.elements.new_password.value;
   const initialSavingsBalance = parseFloat(e.target.elements.initial_savings_balance.value);
-  const goalSavings = parseFloat(e.target.elements.goal_savings_balance.value);
+  const goalSavingsBalance = parseFloat(e.target.elements.goal_savings_balance.value);
+  const budgetGoalTitle = e.target.elements.budget_goal_title.value;
+  const budgetGoalDescription = e.target.elements.budget_goal_description.value;
+  const budgetGoalAmount = parseFloat(e.target.elements.budget_goal_amount.value);
+
   fetch('http://localhost:5235/newUser', {
     method: "POST",
     headers: {
@@ -53,23 +60,16 @@ const NewUser = (e, setIsLoggedIn, setAccountId) => {
     },
     body: JSON.stringify({
       username: username,
-      password: e.target.elements.new_password.value,
+      password: password,
       initialSavingsBalance: initialSavingsBalance,
-      goalSavingsBalance: goalSavings,
-      budgetGoalTitle: e.target.elements.budget_goal_title.value,
-      budgetGoalAmount: parseFloat(e.target.elements.budget_goal_amount.value),
-      budgetGoalDescription: e.target.elements.budget_goal_description.value,
+      goalSavingsBalance: goalSavingsBalance,
+      budgetGoalTitle: budgetGoalTitle,
+      budgetGoalAmount: budgetGoalAmount,
+      budgetGoalDescription: budgetGoalDescription,
     })
   })
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      throw new Error('Network response was not ok.');
-    }
-  })
+  .then(response => response.json())
   .then(data => {
-    data = JSON.parse(data); 
     Cookies.set('username', username, { expires: 7 });
     Cookies.set('accountId', data.accountId, { expires: 7 });
     Cookies.set('savingsAmount', data.initialSavingsBalance, { expires: 7 });

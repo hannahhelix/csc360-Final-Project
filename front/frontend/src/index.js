@@ -1,36 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import reportWebVitals from './reportWebVitals';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Cookies from 'js-cookie';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import './App.css';
 import HomePage from "./Homepage";
 import Budgets from './Budgets';
 import Savings from './Savings';
-import Account from './Account';
 import Login from "./Login";
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Cookies from 'js-cookie';
+
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [accountId, setAccountId] = useState(null);
   const [username, setUsername] = useState('');
-  const [initialSavingsBalance, setInitialSavingsBalance] = useState(null);
-  const [goalSavingsBalance, setGoalSavingsBalance] = useState(null);
+
 
   useEffect(() => {
     const loggedInUser = Cookies.get('username');
     const accountId = Cookies.get('accountId');
-    const initialSavingsBalance = Cookies.get('initialSavingsBalance') || 0;
-    const goalSavingsBalance = Cookies.get('goalSavingsBalance') || 0;
     
     if (loggedInUser && accountId) {
       setIsLoggedIn(true);
       setUsername(loggedInUser);
       setAccountId(accountId);
-      setInitialSavingsBalance(initialSavingsBalance);
-      setGoalSavingsBalance(goalSavingsBalance);
     }
   }, []);
 
@@ -39,18 +34,9 @@ const App = () => {
       <Routes>
         <Route
           path="/"
-          element={isLoggedIn ? <HomePage accountId={accountId} /> : <Login setIsLoggedIn={setIsLoggedIn} setAccountId={setAccountId} />}
-        />
+          element={isLoggedIn ? <HomePage accountId={accountId} /> : <Login setIsLoggedIn={setIsLoggedIn} setAccountId={setAccountId} />}/>
         <Route path="/budgets" element={<Budgets />} />
-        <Route 
-            path="/savings"
-            element={<Savings 
-                        username={username} 
-                        initialSavingsBalance={initialSavingsBalance} 
-                        goalSavings={goalSavingsBalance} 
-                    />} 
-          />
-        <Route path="/account" element={<Account />} />
+        <Route path="/savings" element={<Savings />} />
         <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} setAccountId={setAccountId} />} />
       </Routes>
     </Router>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, ProgressBar, ButtonGroup } from 'react-bootstrap';
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
-import { Person, BoxArrowRight } from 'react-bootstrap-icons';
+import {Routes, Route, Link, Navigate } from 'react-router-dom';
+import { BoxArrowRight } from 'react-bootstrap-icons';
 import './Budgets.css';
 import Account from './Account';
 import Cookies from 'js-cookie';
@@ -124,13 +124,8 @@ function Budgets() {
             <Button variant="primary" className="back-button">&#8592; Home</Button>
           </Link>
         </Col>
-        <Col xs={6}>
+        <Col xs={8}>
           <h2 className="font-weight-bold">Current Budget Goals</h2>
-        </Col>
-        <Col xs={2} className="text-end">
-          <Link to="/account">
-            <Person size={35} color="Black" />
-          </Link>
         </Col>
         <Col xs={2} className="text-end">
         <Link to="/login" onClick={handleLogout}>

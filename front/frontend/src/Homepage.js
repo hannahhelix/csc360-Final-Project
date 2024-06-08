@@ -1,19 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
-import { Button, Container, Row, Col, ProgressBar, Nav } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-import { Person, BoxArrowRight } from 'react-bootstrap-icons';
-import "./Homepage.css"
+import {Link, Navigate } from 'react-router-dom';
+import { Button, Container, Row, Col, ProgressBar } from 'react-bootstrap';
+import { BoxArrowRight } from 'react-bootstrap-icons';
 import Cookies from 'js-cookie';
+import "./Homepage.css"
+
 
 function HomePage({ accountId }) {
   const [budgetGoals, setBudgetGoals] = useState([]);
-
-  const username = Cookies.get('username');
-  // const goal = Cookies.get('goalAmount');
-  // const current = Cookies.get('savingsAmount');
-  // console.log("Goal Savings:",goal );
-  // console.log("Initial Savings:",current );
 
   useEffect(() => {
     const accountId = Cookies.get('accountId');
@@ -44,11 +38,6 @@ function HomePage({ accountId }) {
     <Container className="summary-container">
       <Row className="top-navigation summary-section">
         <Col> <h2 style={{ marginBottom: '10px' }}>Weekly Summary</h2> </Col>
-        <Col xs={2} className="text-end">
-          <Link to="/account">
-            <Person size={35} color="Black" />
-          </Link>
-        </Col>
         <Col xs={2} className="text-end">
         <Link to="/login" onClick={handleLogout}>
             <Button variant="light" className="logout-button">

@@ -2,20 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using back;
 
 #nullable disable
 
-namespace back.Migrations
+namespace back.Migrations.Goals
 {
     [DbContext(typeof(GoalsContext))]
-    [Migration("20240607192117_AddAcc")]
-    partial class AddAcc
+    partial class GoalsContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.5");
@@ -25,12 +22,6 @@ namespace back.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<decimal>("GoalSavingsBalance")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("InitialSavingsBalance")
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -104,48 +95,6 @@ namespace back.Migrations
                     b.ToTable("GoalMarkers");
                 });
 
-            modelBuilder.Entity("back.Login", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<decimal>("BudgetGoalAmount")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("BudgetGoalDescription")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("BudgetGoalTitle")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("GoalSavingsBalance")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("InitialSavingsBalance")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("base64Credentials")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("hash")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Login");
-                });
-
             modelBuilder.Entity("back.SavingsGoals", b =>
                 {
                     b.Property<int>("Id")
@@ -174,6 +123,9 @@ namespace back.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("AccountId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("Amount")
                         .HasColumnType("TEXT");
 
@@ -184,12 +136,9 @@ namespace back.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("SavingsGoalId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("SavingsGoalId");
+                    b.HasIndex("AccountId");
 
                     b.ToTable("TransactionHistories");
                 });
@@ -220,17 +169,6 @@ namespace back.Migrations
                     b.Navigation("SavingsGoal");
                 });
 
-            modelBuilder.Entity("back.Login", b =>
-                {
-                    b.HasOne("back.Account", "Account")
-                        .WithOne("Login")
-                        .HasForeignKey("back.Login", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Account");
-                });
-
             modelBuilder.Entity("back.SavingsGoals", b =>
                 {
                     b.HasOne("back.Account", "Account")
@@ -244,21 +182,18 @@ namespace back.Migrations
 
             modelBuilder.Entity("back.TransactionHistory", b =>
                 {
-                    b.HasOne("back.SavingsGoals", "SavingsGoal")
-                        .WithMany("TransactionHistories")
-                        .HasForeignKey("SavingsGoalId")
+                    b.HasOne("back.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("SavingsGoal");
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("back.Account", b =>
                 {
                     b.Navigation("BudgetGoalsList");
-
-                    b.Navigation("Login")
-                        .IsRequired();
 
                     b.Navigation("MonthlyGoals");
 
@@ -268,8 +203,6 @@ namespace back.Migrations
             modelBuilder.Entity("back.SavingsGoals", b =>
                 {
                     b.Navigation("GoalMarkersList");
-
-                    b.Navigation("TransactionHistories");
                 });
 #pragma warning restore 612, 618
         }
