@@ -16,21 +16,21 @@ const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [accountId, setAccountId] = useState(null);
   const [username, setUsername] = useState('');
-  const [savingsAmount, setSavingsAmount] = useState(null);
-  const [goalAmount, setGoalAmount] = useState(null);
+  const [initialSavingsBalance, setInitialSavingsBalance] = useState(null);
+  const [goalSavingsBalance, setGoalSavingsBalance] = useState(null);
 
   useEffect(() => {
     const loggedInUser = Cookies.get('username');
     const accountId = Cookies.get('accountId');
-    const initialSavingsBalance = parseFloat(Cookies.get('savingsAmount')) || 0;
-    const goalSavingsBalance = parseFloat(Cookies.get('goalAmount')) || 0;
+    const initialSavingsBalance = Cookies.get('initialSavingsBalance') || 0;
+    const goalSavingsBalance = Cookies.get('goalSavingsBalance') || 0;
     
     if (loggedInUser && accountId) {
       setIsLoggedIn(true);
       setUsername(loggedInUser);
       setAccountId(accountId);
-      setSavingsAmount(initialSavingsBalance);
-      setGoalAmount(goalSavingsBalance);
+      setInitialSavingsBalance(initialSavingsBalance);
+      setGoalSavingsBalance(goalSavingsBalance);
     }
   }, []);
 
@@ -43,10 +43,15 @@ const App = () => {
         />
         <Route path="/budgets" element={<Budgets />} />
         <Route 
-          path="/savings"
-          element={<Savings username={username} savingsAmount={savingsAmount} goalAmount={goalAmount} />} 
-        />
+            path="/savings"
+            element={<Savings 
+                        username={username} 
+                        initialSavingsBalance={initialSavingsBalance} 
+                        goalSavings={goalSavingsBalance} 
+                    />} 
+          />
         <Route path="/account" element={<Account />} />
+        <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} setAccountId={setAccountId} />} />
       </Routes>
     </Router>
   );

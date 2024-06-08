@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
-import { Button, Container, Row, Col, ProgressBar } from 'react-bootstrap';
+import { Button, Container, Row, Col, ProgressBar, Nav } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { Person, BoxArrowRight } from 'react-bootstrap-icons';
 import "./Homepage.css"
@@ -10,11 +10,12 @@ function HomePage({ accountId }) {
   const [budgetGoals, setBudgetGoals] = useState([]);
 
   const username = Cookies.get('username');
-  // const accountIdFromCookie = Cookies.get('accountId');
-
+  // const goal = Cookies.get('goalAmount');
+  // const current = Cookies.get('savingsAmount');
+  // console.log("Goal Savings:",goal );
+  // console.log("Initial Savings:",current );
 
   useEffect(() => {
-    // console.log("Homepage Account ID:", accountIdFromCookie);
     const accountId = Cookies.get('accountId');
     fetch(`http://localhost:5235/accounts/${accountId}/budgetGoal`)
       .then(response => {
@@ -36,7 +37,7 @@ function HomePage({ accountId }) {
   const handleLogout = () => {
     Cookies.remove('username');
     Cookies.remove('accountId');
-
+    Navigate('/login');
   };
 
   return (

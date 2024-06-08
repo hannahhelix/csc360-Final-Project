@@ -11,7 +11,7 @@ function Account() {
   const [editedGoalSavingsBalance, setEditedGoalSavingsBalance] = useState('');
 
   useEffect(() => {
-    const accountId = Cookies.get('accountId'); // Assuming you are using the 'js-cookie' library
+    const accountId = Cookies.get('accountId');
     if (accountId) {
       fetch(`http://localhost:5235/accounts/${accountId}`)
         .then((response) => response.json())

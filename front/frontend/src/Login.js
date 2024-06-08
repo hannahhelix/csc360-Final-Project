@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Form, FormGroup, Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
 const Authenticate = (e, setIsLoggedIn, setAccountId, savingsAmount, goalAmount) => {
@@ -34,9 +33,9 @@ const Authenticate = (e, setIsLoggedIn, setAccountId, savingsAmount, goalAmount)
       Cookies.set('accountId', data.accountId, { expires: 7 });
       Cookies.set('savingsAmount', data.initialSavingsBalance, { expires: 7 });
       Cookies.set('goalAmount', data.goalSavingsBalance, { expires: 7 });
-      // console.log(data);
       setIsLoggedIn(true);
       setAccountId(data.accountId);
+      window.location.href = '/';
     })
     .catch(error => {
       console.error('There was a problem with the fetch operation:', error);
@@ -77,6 +76,7 @@ const NewUser = (e, setIsLoggedIn, setAccountId) => {
     Cookies.set('goalAmount', data.goalSavingsBalance, { expires: 7 });
     setIsLoggedIn(true);
     setAccountId(data.accountId);
+    window.location.href = '/';
   })
   .catch(error => {
     console.error('There was a problem with the fetch operation:', error);
@@ -84,7 +84,6 @@ const NewUser = (e, setIsLoggedIn, setAccountId) => {
 };
 
 function Login({ setIsLoggedIn }) {
-  // const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [accountId, setAccountId] = useState(null);
 

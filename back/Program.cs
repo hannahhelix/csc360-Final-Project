@@ -1,15 +1,15 @@
-using System.Linq;
-using System.Text.Json;
+// using System.Linq;
+// using System.Text.Json;
 using back;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
+// using Microsoft.AspNetCore.Builder;
+// using Microsoft.Extensions.DependencyInjection;
+// using Microsoft.Extensions.Hosting;
+// using Microsoft.AspNetCore.Http;
+// using System.Threading.Tasks;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -131,28 +131,28 @@ app.MapGet("/initialize", () =>
 }).WithName("Init").WithOpenApi();
 
 
-app.MapPost("/accounts", (Account account) =>
-{
-    using (var context = new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
-    {
-        context.Accounts.Add(account);
-        context.SaveChanges();
-        foreach (var monthlyGoal in account.MonthlyGoals)
-        {
-            var goalMarker = new GoalMarkers
-            {
-                SavingsGoalId = monthlyGoal.SavingsGoalId,
-                Month = monthlyGoal.Month,
-                Amount = monthlyGoal.Amount,
-                IsCheckedOff = false 
-            };
-            context.GoalMarkers.Add(goalMarker);
-        }
-        context.SaveChanges();
-        context.Database.ExecuteSqlRaw("PRAGMA wal_checkpoint;");
-    }
-    return Results.Created($"/accounts/{account.Id}", account);
-}).WithName("PostAccounts").WithOpenApi();
+// app.MapPost("/accounts", (Account account) =>
+// {
+//     using (var context = new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
+//     {
+//         context.Accounts.Add(account);
+//         context.SaveChanges();
+//         foreach (var monthlyGoal in account.MonthlyGoals)
+//         {
+//             var goalMarker = new GoalMarkers
+//             {
+//                 SavingsGoalId = monthlyGoal.SavingsGoalId,
+//                 Month = monthlyGoal.Month,
+//                 Amount = monthlyGoal.Amount,
+//                 IsCheckedOff = false 
+//             };
+//             context.GoalMarkers.Add(goalMarker);
+//         }
+//         context.SaveChanges();
+//         context.Database.ExecuteSqlRaw("PRAGMA wal_checkpoint;");
+//     }
+//     return Results.Created($"/accounts/{account.Id}", account);
+// }).WithName("PostAccounts").WithOpenApi();
 
 // app.MapGet("/accounts", () =>
 // {
@@ -167,61 +167,48 @@ app.MapPost("/accounts", (Account account) =>
 //     }
 // }).WithName("GetAccounts").WithOpenApi();
 
-app.MapPut("/accounts/{id}", (int id, Account updatedAccount) =>
+
+app.MapGet("/accounts/{accountId}/savingsGoals", (int accountId) =>
 {
     using (var context = new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
     {
-        var account = context.Accounts.Include(a => a.SavingsGoalsList)
-                                      .ThenInclude(sg => sg.GoalMarkersList)
-                                      .Include(a => a.BudgetGoalsList)
-                                      .FirstOrDefault(a => a.Id == id);
-        if (account == null)
-        {
-            return Results.NotFound();
-        }
-
-        account.Username = updatedAccount.Username;
-        account.InitialSavingsBalance = updatedAccount.InitialSavingsBalance;
-        account.GoalSavingsBalance = updatedAccount.GoalSavingsBalance;
-
-        context.SaveChanges();
-        context.Database.ExecuteSqlRaw("PRAGMA wal_checkpoint;");
-
-        return Results.Ok(account);
+        var savingsGoals = context.SavingsGoals
+            .Where(sg => sg.AccountId == accountId)
+            .Include(sg => sg.TransactionHistories)
+            .Include(sg => sg.GoalMarkersList)
+            .Select(sg => new 
+            {
+                sg.Id,
+                sg.CurrentSavingsBalance,
+                sg.GoalAmount,
+                sg.AccountId,
+                sg.TransactionHistories,
+                sg.GoalMarkersList
+            })
+            .ToList();
+        return Results.Ok(savingsGoals);
     }
-}).WithName("UpdateAccount").WithOpenApi();
+}).WithName("GetSavingsGoals").WithOpenApi();
 
-// app.MapGet("/savingsGoals", () =>
-// {
-//     using (var context =  new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
-//     {
-//         var savingsGoals = context.SavingsGoals.Include(sg => sg.TransactionHistories).Include(sg => sg.GoalMarkersList).ToList();
-//         return Results.Ok(savingsGoals);
-//     }
-// }).WithName("GetSavingsGoals").WithOpenApi();
+app.MapPost("/newTransaction", async (HttpContext context, GoalsContext dbContext) =>
+{
+    try
+    {
+        var transactionData = await context.Request.ReadFromJsonAsync<TransactionHistory>();
 
-// app.MapPost("/savingsGoals", (SavingsGoals savingsGoal) =>
-// {
-//     using (var context =  new GoalsContext(new DbContextOptionsBuilder<GoalsContext>().UseSqlite("Data Source=FinanceApp.db").Options))
-//     {
-//         context.SavingsGoals.Add(savingsGoal);
-//         context.SaveChanges();
-//         context.Database.ExecuteSqlRaw("PRAGMA wal_checkpoint;");
-//     }
-//     return Results.Created($"/savingsGoals/{savingsGoal.Id}", savingsGoal);
-// }).WithName("PostSavingsGoals").WithOpenApi();
-
-// app.MapPost("/transactions", async (TransactionHistory transactionHistory, GoalsContext context) =>
-// {
-//     // Add the new transaction to the context
-//     context.TransactionHistories.Add(transactionHistory);
-//     await context.SaveChangesAsync();
-//     var updatedTransactions = await context.TransactionHistories.ToListAsync();
-//     return Results.Ok(updatedTransactions);
-// })
-// .WithName("PostTransaction")
-// .WithOpenApi()
-// .RequireAuthorization(new AuthorizeAttribute() { AuthenticationSchemes = "BasicAuthentication" });
+        if (transactionData == null)
+        {
+            return Results.BadRequest("Invalid request data");
+        }
+        dbContext.TransactionHistories.Add(transactionData);
+        await dbContext.SaveChangesAsync();
+        return Results.Created($"/transactions/{transactionData.Id}", transactionData);
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest($"Error adding transaction: {ex.Message}");
+    }
+}).WithName("PostTransaction").WithOpenApi();
 
 app.MapGet("/accounts/{accountId}/budgetGoal", (int accountId) =>
 {
@@ -247,8 +234,6 @@ app.MapPost("/newBudgetGoal", async (HttpContext context, GoalsContext dbContext
 
         dbContext.BudgetGoals.Add(budgetGoalData);
         await dbContext.SaveChangesAsync();
-        
-        // If you need to return the created budget goal with the assigned ID
         return Results.Created($"/budgetGoals/{budgetGoalData.Id}", budgetGoalData);
     }
     catch (Exception ex)

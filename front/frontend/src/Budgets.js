@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, ProgressBar, ButtonGroup } from 'react-bootstrap';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Person } from 'react-bootstrap-icons';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { Person, BoxArrowRight } from 'react-bootstrap-icons';
 import './Budgets.css';
 import Account from './Account';
 import Cookies from 'js-cookie';
@@ -64,6 +64,12 @@ function Budgets() {
     }
   };
 
+  const handleLogout = () => {
+    Cookies.remove('username');
+    Cookies.remove('accountId');
+    Navigate('/login');
+  };
+  
   const handleSubmit = (e) => {
     e.preventDefault();
     const form = e.target;
@@ -118,7 +124,7 @@ function Budgets() {
             <Button variant="primary" className="back-button">&#8592; Home</Button>
           </Link>
         </Col>
-        <Col xs={8}>
+        <Col xs={6}>
           <h2 className="font-weight-bold">Current Budget Goals</h2>
         </Col>
         <Col xs={2} className="text-end">
@@ -126,8 +132,16 @@ function Budgets() {
             <Person size={35} color="Black" />
           </Link>
         </Col>
-        <div className="horizontal-line" />
+        <Col xs={2} className="text-end">
+        <Link to="/login" onClick={handleLogout}>
+            <Button variant="light" className="logout-button">
+              <BoxArrowRight size={25} />
+            </Button>
+          </Link>
+        </Col>
+       
       </Row>
+      <div className="horizontal-line" />
   
       <Row className="container">
       <Col md={9}>
