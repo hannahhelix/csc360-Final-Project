@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\back.csproj": {}
+    "C:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\back.csproj": {}
   },
   "projects": {
-    "c:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\back.csproj": {
+    "C:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\back.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\back.csproj",
+        "projectUniqueName": "C:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\back.csproj",
         "projectName": "back",
-        "projectPath": "c:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\back.csproj",
+        "projectPath": "C:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\back.csproj",
         "packagesPath": "C:\\Users\\jawsg\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\obj\\",
+        "outputPath": "C:\\Users\\jawsg\\OneDrive\\Desktop\\school\\senior year 2023-2024\\spring\\csc360 web apps\\final project\\csc360-Final-Project\\back\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\jawsg\\AppData\\Roaming\\NuGet\\NuGet.Config",
